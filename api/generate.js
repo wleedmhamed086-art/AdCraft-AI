@@ -6,7 +6,7 @@ export default async function handler(req, res) {
   const apiKey = process.env.GEMINI_API_KEY;
 
   if (!apiKey) {
-    return res.status(500).json({ error: 'لم يتم العثور على مفتاح GEMINI_API_KEY في إعدادات Vercel.' });
+    return res.status(500).json({ error: 'لم يتم العثور على GEMINI_API_KEY. تأكد من إضافته في Vercel وتحديث التعيين (Redeploy).' });
   }
 
   try {
@@ -22,15 +22,14 @@ export default async function handler(req, res) {
       });
     }
 
-    // قائمة النماذج التي سيجربها السيرفر تلقائياً بالترتيب
+    // أحدث أسماء النماذج المتاحة في API
     const candidateModels = [
+      'gemini-2.5-flash',
       'gemini-1.5-flash',
-      'gemini-2.0-flash',
-      'gemini-1.5-flash-latest',
-      'gemini-1.5-pro'
+      'gemini-2.0-flash'
     ];
 
-    let lastError = null;
+    let lastErrorDetails = '';
 
     for (const model of candidateModels) {
       const googleResponse = await fetch(
@@ -44,16 +43,18 @@ export default async function handler(req, res) {
 
       const data = await googleResponse.json();
 
-      // إذا نجح التوليد مع النموذج، أرجع النتيجة فوراً
       if (googleResponse.ok && !data.error) {
         return res.status(200).json(data);
       }
 
-      lastError = data.error;
+      if (data.error) {
+        lastErrorDetails = data.error.message || JSON.stringify(data.error);
+      }
     }
 
-    // إذا لم يعمل أي نموذج من القائمة، قم بإرجاع الخطأ
-    return res.status(400).json({ error: lastError });
+    return res.status(400).json({ 
+      error: `فشل الاتصال بالنماذج. السبب: ${lastErrorDetails}` 
+    });
 
   } catch (error) {
     console.error('Server Error:', error);
