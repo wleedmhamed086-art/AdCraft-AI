@@ -3,107 +3,201 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>منصة إنشاء الإعلانات | Gemini Studio</title>
+  <title>AdCraft AI | منصة توليد الإعلانات الذكية</title>
+  <!-- Google Fonts & Lucide Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Readex+Pro:wght@300;400;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary: #2563eb;
-      --primary-hover: #1d4ed8;
-      --bg: #f8fafc;
-      --card-bg: #ffffff;
-      --text: #0f172a;
-      --border: #e2e8f0;
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --accent: #06b6d4;
+      --bg: #0f172a;
+      --panel: #1e293b;
+      --panel-border: #334155;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --radius: 12px;
     }
 
-    * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 0; }
-    body { background-color: var(--bg); color: var(--text); padding: 20px; min-height: 100vh; display: flex; justify-content: center; align-items: center; }
-    
-    .app-card { background: var(--card-bg); width: 100%; max-width: 680px; padding: 30px; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); border: 1px solid var(--border); }
-    .header { text-align: center; margin-bottom: 25px; }
-    .header h1 { font-size: 24px; color: var(--primary); margin-bottom: 6px; }
-    .header p { color: #64748b; font-size: 14px; }
+    * { box-sizing: border-box; font-family: 'Readex Pro', sans-serif; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; }
 
-    .form-group { margin-bottom: 18px; }
-    label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 14px; color: #334155; }
-    input[type="text"], textarea { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; outline: none; transition: 0.2s; background: #fff; }
-    input:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+    /* Navbar */
+    .navbar { background: rgba(30, 41, 59, 0.8); backdrop-filter: blur(10px); border-bottom: 1px solid var(--panel-border); padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 50; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 20px; color: #fff; }
+    .brand-logo { background: linear-gradient(135deg, var(--primary), var(--accent)); padding: 8px 12px; border-radius: 8px; font-size: 16px; }
+    .nav-badge { background: rgba(79, 70, 229, 0.2); color: #818cf8; border: 1px solid rgba(79, 70, 229, 0.4); padding: 4px 10px; border-radius: 20px; font-size: 12px; }
 
-    .file-dropzone { border: 2px dashed var(--border); padding: 15px; border-radius: 8px; text-align: center; cursor: pointer; background: #f8fafc; transition: 0.2s; }
-    .file-dropzone:hover { border-color: var(--primary); background: #eff6ff; }
-    #imagePreview { max-width: 100px; max-height: 100px; border-radius: 6px; margin-top: 10px; display: none; margin: 10px auto 0 auto; }
+    /* Main Container */
+    .app-container { max-width: 1200px; margin: 30px auto; padding: 0 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 24px; flex: 1; width: 100%; }
 
-    .btn-main { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.2s; margin-top: 10px; }
-    .btn-main:hover { background: var(--primary-hover); }
-    .btn-main:disabled { background: #94a3b8; cursor: not-allowed; }
+    /* Form Panel */
+    .card-panel { background: var(--panel); border: 1px solid var(--panel-border); border-radius: var(--radius); padding: 24px; display: flex; flex-direction: column; gap: 18px; }
+    .panel-header { margin-bottom: 6px; }
+    .panel-header h2 { font-size: 18px; color: #fff; font-weight: 600; margin-bottom: 4px; }
+    .panel-header p { font-size: 13px; color: var(--text-muted); }
 
-    .status-box { margin-top: 20px; padding: 12px; border-radius: 8px; font-size: 14px; font-weight: 500; display: none; }
-    .status-box.loading { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
-    .status-box.error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    label { font-size: 13px; font-weight: 600; color: #cbd5e1; }
+    input[type="text"], textarea, select { width: 100%; background: #0f172a; border: 1px solid var(--panel-border); color: #fff; padding: 12px; border-radius: 8px; font-size: 14px; outline: none; transition: 0.2s; }
+    input:focus, textarea:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2); }
 
-    .result-container { margin-top: 25px; display: none; }
-    .result-title { font-weight: 700; font-size: 16px; margin-bottom: 10px; }
-    .result-body { background: #f8fafc; padding: 18px; border-radius: 10px; border: 1px solid var(--border); white-space: pre-line; font-size: 14px; line-height: 1.7; color: #1e293b; max-height: 400px; overflow-y: auto; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
-    .controls-row { display: flex; gap: 10px; margin-top: 12px; }
-    .btn-secondary { flex: 1; padding: 10px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 6px; }
-    .btn-play { background: #dcfce7; color: #15803d; }
-    .btn-play:hover { background: #bbf7d0; }
-    .btn-stop { background: #fee2e2; color: #b91c1c; }
-    .btn-stop:hover { background: #fecaca; }
-    .btn-copy { background: #e0f2fe; color: #0369a1; }
-    .btn-copy:hover { background: #bae6fd; }
+    /* File Dropzone */
+    .dropzone { border: 2px dashed var(--panel-border); background: #0f172a; border-radius: 8px; padding: 16px; text-align: center; cursor: pointer; transition: 0.2s; }
+    .dropzone:hover { border-color: var(--primary); background: rgba(79, 70, 229, 0.05); }
+    #imagePreview { max-width: 80px; max-height: 80px; border-radius: 6px; margin-top: 8px; display: none; margin-x: auto; }
 
-    @media (max-width: 600px) { .controls-row { flex-direction: column; } }
+    /* Buttons */
+    .btn-submit { background: linear-gradient(135deg, var(--primary), var(--primary-hover)); color: white; border: none; padding: 14px; border-radius: 8px; font-weight: 600; font-size: 15px; cursor: pointer; transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 6px; }
+    .btn-submit:hover { opacity: 0.95; transform: translateY(-1px); }
+    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    /* Output Section */
+    .output-panel { background: var(--panel); border: 1px solid var(--panel-border); border-radius: var(--radius); padding: 24px; display: flex; flex-direction: column; height: 100%; min-height: 500px; }
+    .placeholder-state { margin: auto; text-align: center; color: var(--text-muted); display: flex; flex-direction: column; align-items: center; gap: 12px; }
+    .placeholder-icon { font-size: 40px; background: rgba(255,255,255,0.05); width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+
+    .result-content { display: none; flex-direction: column; height: 100%; gap: 16px; }
+    .result-box { background: #0f172a; border: 1px solid var(--panel-border); border-radius: 8px; padding: 18px; font-size: 14px; line-height: 1.8; color: #e2e8f0; flex: 1; overflow-y: auto; white-space: pre-wrap; }
+
+    .action-bar { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn-action { background: #334155; color: #fff; border: none; padding: 10px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 6px; flex: 1; justify-content: center; }
+    .btn-action:hover { background: #475569; }
+    .btn-action.primary { background: var(--primary); }
+    .btn-action.primary:hover { background: var(--primary-hover); }
+
+    /* Status Messages */
+    .status-alert { padding: 12px; border-radius: 8px; font-size: 13px; display: none; }
+    .status-alert.error { background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #fca5a5; }
+    .status-alert.loading { background: rgba(6, 182, 212, 0.15); border: 1px solid rgba(6, 182, 212, 0.3); color: #67e8f9; }
+
+    /* History Sidebar Drawer */
+    .history-section { margin-top: 10px; border-top: 1px solid var(--panel-border); pt: 10px; }
+    .history-title { font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 8px; }
+    .history-list { display: flex; flex-direction: column; gap: 6px; max-height: 120px; overflow-y: auto; }
+    .history-item { background: #0f172a; padding: 8px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; color: #cbd5e1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border: 1px solid transparent; }
+    .history-item:hover { border-color: var(--primary); }
+
+    @media (max-width: 900px) { .app-container { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
 
-  <div class="app-card">
-    <div class="header">
-      <h1>🎬 صانع الإعلانات المباشر</h1>
-      <p>يولد سيناريو الإعلانات والتعليق الصوتي باستخدام نماذج Gemini الذكية</p>
+  <!-- Top Navigation -->
+  <header class="navbar">
+    <div class="brand">
+      <span class="brand-logo">⚡ AdCraft</span>
+      <span>AI Studio</span>
     </div>
+    <span class="nav-badge">النسخة الاحترافية SaaS v2.0</span>
+  </header>
 
-    <!-- تفاصيل المنتج -->
-    <div class="form-group">
-      <label for="productName">اسم المنتج أو الخدمة *</label>
-      <input type="text" id="productName" placeholder="مثال: عطر لافندر الملكي">
-    </div>
-
-    <div class="form-group">
-      <label for="productDescription">تفاصيل المنتج والمميزات</label>
-      <textarea id="productDescription" rows="3" placeholder="الوصف والمزايا الأساسية للمنتج..."></textarea>
-    </div>
-
-    <!-- رفع الصورة -->
-    <div class="form-group">
-      <label>صورة المنتج (اختياري)</label>
-      <div class="file-dropzone" onclick="document.getElementById('productImage').click()">
-        <span id="uploadText">📁 اضغط هنا لرفع صورة المنتج</span>
-        <input type="file" id="productImage" accept="image/*" style="display: none;" onchange="handleImage(event)">
-        <img id="imagePreview" alt="معاينة الصورة">
+  <!-- Main App View -->
+  <main class="app-container">
+    
+    <!-- Left Input Panel -->
+    <section class="card-panel">
+      <div class="panel-header">
+        <h2>🚀 إنشاء حملة إعلانية جديدة</h2>
+        <p>قم بتحديد تفاصيل المنتج والجمهور لإنشاء سيناريو تسويقي متكامل</p>
       </div>
-    </div>
 
-    <button id="submitBtn" class="btn-main" onclick="generateAd()">🚀 إنشاء سيناريو الإعلان</button>
-
-    <div id="statusBox" class="status-box"></div>
-
-    <!-- النتائج -->
-    <div id="resultContainer" class="result-container">
-      <div class="result-title">📋 خطة الإعلان الناتجة:</div>
-      <div id="resultText" class="result-body"></div>
-
-      <div class="controls-row">
-        <button class="btn-secondary btn-play" onclick="playSpeech()">🔊 استماع للتعليق الصوتي</button>
-        <button class="btn-secondary btn-stop" onclick="stopSpeech()">⏹️ إيقاف الصوت</button>
-        <button class="btn-secondary btn-copy" onclick="copyResult()">📋 نسخ النص</button>
+      <div class="form-group">
+        <label>اسم المنتج أو الخدمة *</label>
+        <input type="text" id="productName" placeholder="مثال: تطبيق توصيل الطلبات 'سريع'">
       </div>
-    </div>
-  </div>
+
+      <div class="grid-2">
+        <div class="form-group">
+          <label>منصة الإعلان</label>
+          <select id="platformSelect">
+            <option value="تيك توك و ريلز (TikTok / Reels)">تيك توك / ريلز (فيديو قصير)</option>
+            <option value="فيسبوك و إنستغرام">فيسبوك / إنستغرام</option>
+            <option value="يوتيوب (YouTube Ads)">إعلانات يوتيوب</option>
+            <option value="سناب شات (Snapchat Ads)">سناب شات</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>نبرة الإعلان (Tone)</label>
+          <select id="toneSelect">
+            <option value="حماسي وجذاب للغاية">🔥 حماسي وسريع</option>
+            <option value="احترافي وإقناعي">مباشر ومقنع</option>
+            <option value="فكاهي وممتع">فكاهي / خفيف الظل</option>
+            <option value="فاخر وراقي">فاخر وراقي</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>الجمهور المستهدف</label>
+        <input type="text" id="targetAudience" placeholder="مثال: الشباب من 18-35، أصحاب الأعمال، الأمهات...">
+      </div>
+
+      <div class="form-group">
+        <label>الوصف والمميزات الرئيسية</label>
+        <textarea id="productDescription" rows="3" placeholder="أدخل المزايا التنافسية، الخصومات، أو العرض الخاطف..."></textarea>
+      </div>
+
+      <!-- File Dropzone -->
+      <div class="form-group">
+        <label>صورة المنتج (اختياري للتحليل البصري)</label>
+        <div class="dropzone" onclick="document.getElementById('productImage').click()">
+          <span id="uploadText">📁 اضغط أو اسحب صورة المنتج هنا</span>
+          <input type="file" id="productImage" accept="image/*" style="display: none;" onchange="handleImage(event)">
+          <center><img id="imagePreview" alt="Preview"></center>
+        </div>
+      </div>
+
+      <button id="submitBtn" class="btn-submit" onclick="generateSaaSAd()">
+        <span>✨ توليد سيناريو الإعلان</span>
+      </button>
+
+      <div id="statusAlert" class="status-alert"></div>
+
+      <!-- History -->
+      <div class="history-section">
+        <div class="history-title">📜 السجل المحلي للإعلانات</div>
+        <div id="historyList" class="history-list">
+          <span style="font-size: 11px; color: var(--text-muted);">لا توجد إعلانات محفوطة بعد.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right Output Panel -->
+    <section class="output-panel">
+      <!-- Placeholder State -->
+      <div id="placeholderState" class="placeholder-state">
+        <div class="placeholder-icon">🎬</div>
+        <h3>جاهز لتوليد إعلانك القادم</h3>
+        <p style="max-width: 300px; font-size: 13px;">قم بتعبئة بيانات المنتج على اليمين واضغط على "توليد السيناريو" للحصول على خطة احترافية.</p>
+      </div>
+
+      <!-- Result State -->
+      <div id="resultContent" class="result-content">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h3 style="font-size: 16px; color: #fff;">📋 خطة الإعلان التنافسية</h3>
+          <span id="generatedPlatformTag" class="nav-badge" style="background: rgba(6, 182, 212, 0.2); color: #67e8f9; border-color: rgba(6, 182, 212, 0.4);">تيك توك</span>
+        </div>
+
+        <div id="resultText" class="result-box"></div>
+
+        <div class="action-bar">
+          <button class="btn-action primary" onclick="playSpeech()">🔊 استماع صوتي</button>
+          <button class="btn-action" onclick="stopSpeech()">⏹️ إيقاف</button>
+          <button class="btn-action" onclick="copyResult()">📋 نسخ النص</button>
+          <button class="btn-action" onclick="downloadTXT()">💾 تحميل TXT</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
 
   <script>
     let globalImageData = null;
 
+    // Handle Image Preview
     function handleImage(event) {
       const file = event.target.files[0];
       const preview = document.getElementById('imagePreview');
@@ -112,7 +206,7 @@
       if (file) {
         preview.src = URL.createObjectURL(file);
         preview.style.display = 'block';
-        uploadText.innerText = `تم اختيار: ${file.name}`;
+        uploadText.innerText = `تم رفع: ${file.name}`;
 
         const reader = new FileReader();
         reader.onload = () => {
@@ -125,52 +219,64 @@
       }
     }
 
-    function showStatus(message, type) {
-      const box = document.getElementById('statusBox');
-      box.className = `status-box ${type}`;
-      box.innerText = message;
-      box.style.display = 'block';
+    // Status Helper
+    function showStatus(msg, type) {
+      const alert = document.getElementById('statusAlert');
+      alert.className = `status-alert ${type}`;
+      alert.innerText = msg;
+      alert.style.display = 'block';
     }
 
     function hideStatus() {
-      document.getElementById('statusBox').style.display = 'none';
+      document.getElementById('statusAlert').style.display = 'none';
     }
 
-    async function generateAd() {
+    // Generate Ad Main Function
+    async function generateSaaSAd() {
       const productName = document.getElementById('productName').value.trim();
-      const productDescription = document.getElementById('productDescription').value.trim();
+      const platform = document.getElementById('platformSelect').value;
+      const tone = document.getElementById('toneSelect').value;
+      const audience = document.getElementById('targetAudience').value.trim();
+      const description = document.getElementById('productDescription').value.trim();
       const submitBtn = document.getElementById('submitBtn');
-      const resultContainer = document.getElementById('resultContainer');
-      const resultText = document.getElementById('resultText');
 
-      if (!productName) { showStatus('⚠️ يرجى كتابة اسم المنتج.', 'error'); return; }
+      if (!productName) {
+        showStatus('⚠️ يرجى كتابة اسم المنتج أو الخدمة.', 'error');
+        return;
+      }
 
-      stopSpeech();
       submitBtn.disabled = true;
-      submitBtn.innerText = '⏳ جاري المعالجة...';
-      showStatus('⚡ جاري الذكاء الاصطناعي لتوليد السيناريو...', 'loading');
-      resultContainer.style.display = 'none';
+      submitBtn.innerHTML = '⏳ جاري كتابة الإعلان وتصميم المشاهد...';
+      showStatus('⚡ يقوم الذكاء الاصطناعي بتحليل البيانات وهيكلة خطة الإعلان...', 'loading');
 
       try {
         const promptText = `
-أنت مستشار تسويقي ومخرج إعلانات محترف.
-قم بإعداد خطة إعلان فيديو تسويقي متكاملة باللغة العربية بناءً على البيانات التالية:
+أنت مستشار تسويقي عالمي وخبير في كتابة إعلانات الفيديو الأكثر تحويلاً (High-Converting Video Ads).
+قم بإعداد خطة إعلان شاملة وحاسمة للمنتج التالي:
 - اسم المنتج: ${productName}
-- وصف المنتج: ${productDescription || 'غير محدد'}
+- المنصة المستهدفة: ${platform}
+- نبرة الإعلان: ${tone}
+- الجمهور المستهدف: ${audience || 'عام'}
+- الوصف والمميزات: ${description || 'غير محدد'}
 
-قم بتنسيق الإجابة بوضوح كالتالي:
+صمّم الإجابة بأسلوب تسويقي فاخر ومُنسّق كالتالي:
 
-[السيناريو الصوتي]
-(اكتب هنا نص التعليق الصوتي المباشر والملهم الذي سيتم قراءته صوتاً)
+🎯 [اللقطة الخاطفة - Hook]
+(أول 3 ثوانٍ لجذب الانتباه فوراً ورسم الفضول)
 
-[وصف المشاهد المرئية]
-(وصف المشاهد البصرية والصور المقترحة لكل قطعة من الإعلان)
+🎙️ [السيناريو الصوتي - Voiceover Script]
+(نص التعليق الصوتي المباشر والملهم باللغة العربية القابل للقراءة فوراً)
 
-[النصوص المكتوبة على الشاشة]
-(العبارات والعناوين المفتاحية التي تظهر كـ Text Overlay)
+🎬 [وصف المشاهد المرئية - Visual Scenes]
+(المشاهد البصرية والحركات المقترحة للكاميرا لكل جزء من النص)
+
+📝 [النصوص المكتوبة على الشاشة - Text Overlays]
+(العناوين والعبارات السريعة التي تظهر في الفيديو)
+
+🚀 [دعوة لاتخاذ إجراء - Call To Action]
+(الجملة الختامية الحاسمة لشراء المنتج أو التفاعل)
         `;
 
-        // إرسال الطلب إلى السيرفر المحمي Vercel Serverless Function
         const response = await fetch('/api/generate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -186,27 +292,36 @@
           showStatus(`❌ خطأ: ${typeof data.error === 'string' ? data.error : data.error.message}`, 'error');
         } else if (data.candidates && data.candidates[0].content) {
           hideStatus();
-          resultText.innerText = data.candidates[0].content.parts[0].text;
-          resultContainer.style.display = 'block';
+          const generatedText = data.candidates[0].content.parts[0].text;
+          
+          // Display Result
+          document.getElementById('placeholderState').style.display = 'none';
+          document.getElementById('resultContent').style.display = 'flex';
+          document.getElementById('resultText').innerText = generatedText;
+          document.getElementById('generatedPlatformTag').innerText = platform;
+
+          // Save to Local History
+          saveToHistory(productName, generatedText);
         } else {
-          showStatus('❌ تعذر الحصول على استجابة من النموذج.', 'error');
+          showStatus('❌ تعذر استلام الاستجابة المناسبة.', 'error');
         }
 
       } catch (err) {
-        showStatus('❌ حدث خطأ في الاتصال بالشبكة أو الخادم.', 'error');
+        showStatus('❌ حدث خطأ في الاتصال بالخادم السحابي.', 'error');
         console.error(err);
       } finally {
         submitBtn.disabled = false;
-        submitBtn.innerText = '🚀 إنشاء سيناريو الإعلان';
+        submitBtn.innerHTML = '<span>✨ توليد سيناريو الإعلان</span>';
       }
     }
 
+    // Audio Playback (TTS)
     function playSpeech() {
       const fullText = document.getElementById('resultText').innerText;
       if (!fullText) return;
 
       stopSpeech();
-      const match = fullText.match(/\[السيناريو الصوتي\]([\s\S]*?)(?=\[|$)/i);
+      const match = fullText.match(/\[السيناريو الصوتي - Voiceover Script\]([\s\S]*?)(?=\[|$)/i);
       const textToRead = match ? match[1].trim() : fullText;
 
       const utterance = new SpeechSynthesisUtterance(textToRead);
@@ -224,12 +339,54 @@
       if (window.speechSynthesis) window.speechSynthesis.cancel();
     }
 
+    // Copy to Clipboard
     function copyResult() {
       const text = document.getElementById('resultText').innerText;
       navigator.clipboard.writeText(text).then(() => {
-        alert('📋 تم نسخ سيناريو الإعلان بنجاح!');
+        alert('📋 تم نسخ خطة الإعلان بنجاح!');
       });
     }
+
+    // Download TXT
+    function downloadTXT() {
+      const text = document.getElementById('resultText').innerText;
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `AdCraft-Script-${Date.now()}.txt`;
+      link.click();
+    }
+
+    // History LocalStorage Management
+    function saveToHistory(title, content) {
+      let history = JSON.parse(localStorage.getItem('adcraft_history') || '[]');
+      history.unshift({ title, content, date: new Date().toLocaleTimeString('ar-EG') });
+      if (history.length > 5) history.pop();
+      localStorage.setItem('adcraft_history', JSON.stringify(history));
+      loadHistory();
+    }
+
+    function loadHistory() {
+      let history = JSON.parse(localStorage.getItem('adcraft_history') || '[]');
+      const container = document.getElementById('historyList');
+      if (history.length === 0) return;
+
+      container.innerHTML = '';
+      history.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'history-item';
+        div.innerText = `📌 ${item.title} (${item.date})`;
+        div.onclick = () => {
+          document.getElementById('placeholderState').style.display = 'none';
+          document.getElementById('resultContent').style.display = 'flex';
+          document.getElementById('resultText').innerText = item.content;
+        };
+        container.appendChild(div);
+      });
+    }
+
+    // Load History on Startup
+    document.addEventListener('DOMContentLoaded', loadHistory);
   </script>
 </body>
 </html>
