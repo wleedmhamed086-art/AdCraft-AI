@@ -1,10 +1,165 @@
-<!-- Modal Auth -->
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AdCraft AI | منصة توليد الإعلانات الذكية</title>
+  <!-- Google Fonts & Supabase SDK -->
+  <link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --accent: #06b6d4;
+      --bg: #0f172a;
+      --panel: #1e293b;
+      --panel-border: #334155;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --radius: 12px;
+    }
+    * { box-sizing: border-box; font-family: 'Readex Pro', sans-serif; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; }
+
+    /* Header */
+    .navbar { background: rgba(30, 41, 59, 0.85); backdrop-filter: blur(10px); border-bottom: 1px solid var(--panel-border); padding: 14px 28px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 50; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 19px; color: #fff; }
+    .brand-logo { background: linear-gradient(135deg, var(--primary), var(--accent)); padding: 6px 12px; border-radius: 8px; font-size: 15px; }
+
+    /* Layout */
+    .app-container { max-width: 1200px; margin: 24px auto; padding: 0 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 24px; flex: 1; width: 100%; }
+    .card-panel { background: var(--panel); border: 1px solid var(--panel-border); border-radius: var(--radius); padding: 22px; display: flex; flex-direction: column; gap: 16px; }
+
+    /* Forms */
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    label { font-size: 13px; font-weight: 600; color: #cbd5e1; }
+    input[type="text"], input[type="email"], input[type="password"], textarea, select { width: 100%; background: #0f172a; border: 1px solid var(--panel-border); color: #fff; padding: 10px 14px; border-radius: 8px; font-size: 13px; outline: none; }
+    input:focus, textarea:focus, select:focus { border-color: var(--primary); }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .dropzone { border: 2px dashed var(--panel-border); background: #0f172a; border-radius: 8px; padding: 14px; text-align: center; cursor: pointer; }
+    #imagePreview { max-width: 70px; max-height: 70px; border-radius: 6px; margin-top: 6px; display: none; }
+
+    /* Buttons */
+    .btn-submit { background: linear-gradient(135deg, var(--primary), var(--primary-hover)); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; }
+    .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-action { background: #334155; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; justify-content: center; }
+    .btn-action:hover { background: #475569; }
+
+    /* Output Section */
+    .output-panel { background: var(--panel); border: 1px solid var(--panel-border); border-radius: var(--radius); padding: 22px; display: flex; flex-direction: column; height: 100%; min-height: 480px; }
+    .placeholder-state { margin: auto; text-align: center; color: var(--text-muted); }
+    .result-content { display: none; flex-direction: column; height: 100%; gap: 14px; }
+    .result-box { background: #0f172a; border: 1px solid var(--panel-border); border-radius: 8px; padding: 16px; font-size: 13px; line-height: 1.8; color: #e2e8f0; flex: 1; overflow-y: auto; white-space: pre-wrap; }
+
+    /* Modal */
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 100; }
+    .modal-card { background: var(--panel); border: 1px solid var(--panel-border); border-radius: var(--radius); padding: 24px; width: 100%; max-width: 380px; position: relative; }
+    
+    .status-alert { padding: 10px; border-radius: 8px; font-size: 12px; display: none; }
+    .status-alert.error { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); }
+    .status-alert.loading { background: rgba(6, 182, 212, 0.15); color: #67e8f9; border: 1px solid rgba(6, 182, 212, 0.3); }
+
+    @media (max-width: 850px) { .app-container { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="brand">
+      <span class="brand-logo">⚡ AdCraft</span>
+      <span>AI Studio</span>
+    </div>
+    <div id="authControls"></div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="app-container">
+    
+    <!-- Input Form -->
+    <section class="card-panel">
+      <div>
+        <h2 style="font-size: 17px; color: #fff;">🚀 إنشاء إعلان جديد</h2>
+        <p style="font-size: 12px; color: var(--text-muted);">أدخل بيانات منتجك لتوليد سيناريو تسويقي كامل</p>
+      </div>
+
+      <div class="form-group">
+        <label>اسم المنتج أو الخدمة *</label>
+        <input type="text" id="productName" placeholder="مثال: تطبيق توصيل الطلبات 'سريع'">
+      </div>
+
+      <div class="grid-2">
+        <div class="form-group">
+          <label>المنصة</label>
+          <select id="platformSelect">
+            <option value="تيك توك / ريلز">تيك توك / ريلز</option>
+            <option value="فيسبوك / إنستغرام">فيسبوك / إنستغرام</option>
+            <option value="إعلانات يوتيوب">إعلانات يوتيوب</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>النبرة</label>
+          <select id="toneSelect">
+            <option value="حماسي وسريع">🔥 حماسي وسريع</option>
+            <option value="احترافي ومقنع">💼 احترافي ومقنع</option>
+            <option value="فكاهي وممتع">😂 فكاهي وممتع</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>الجمهور المستهدف</label>
+        <input type="text" id="targetAudience" placeholder="مثال: الشباب من 18-35...">
+      </div>
+
+      <div class="form-group">
+        <label>الوصف والمميزات</label>
+        <textarea id="productDescription" rows="2" placeholder="أدخل المزايا، الخصومات، أو العرض الخاطف..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>صورة المنتج (اختياري)</label>
+        <div class="dropzone" onclick="document.getElementById('productImage').click()">
+          <span id="uploadText" style="font-size: 12px; color: var(--text-muted);">📁 اضغط هنا لرفع صورة</span>
+          <input type="file" id="productImage" accept="image/*" style="display: none;" onchange="handleImage(event)">
+          <center><img id="imagePreview" alt="Preview"></center>
+        </div>
+      </div>
+
+      <button id="submitBtn" class="btn-submit" onclick="generateSaaSAd()">✨ توليد سيناريو الإعلان</button>
+      <div id="statusAlert" class="status-alert"></div>
+    </section>
+
+    <!-- Output Section -->
+    <section class="output-panel">
+      <div id="placeholderState" class="placeholder-state">
+        <div style="font-size: 36px; margin-bottom: 8px;">🎬</div>
+        <h3 style="font-size: 15px;">جاهز لتوليد إعلانك القادم</h3>
+        <p style="font-size: 12px; max-width: 260px; margin-top: 4px;">قم بتعبئة التفاصيل واضغط على توليد السيناريو.</p>
+      </div>
+
+      <div id="resultContent" class="result-content">
+        <h3 style="font-size: 15px; color: #fff;">📋 سيناريو الإعلان</h3>
+        <div id="resultText" class="result-box"></div>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn-action" style="flex:1;" onclick="playSpeech()">🔊 استماع</button>
+          <button class="btn-action" style="flex:1;" onclick="stopSpeech()">⏹️ إيقاف</button>
+          <button class="btn-action" style="flex:1;" onclick="copyResult()">📋 نسخ</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Modal Auth -->
   <div id="authModal" class="modal-overlay">
     <div class="modal-card">
       <button style="position: absolute; top: 12px; left: 12px; background: none; border: none; color: #fff; cursor: pointer; font-size: 16px;" onclick="closeAuthModal()">✕</button>
       <h3 style="color: #fff; font-size: 16px; margin-bottom: 16px; text-align: center;">تسجيل الدخول / حساب جديد</h3>
       
-      <!-- 1️⃣ زر تسجيل الدخول بواسطة GitHub -->
+      <!-- زر تسجيل الدخول بواسطة GitHub -->
       <button class="btn-action" style="width: 100%; margin-bottom: 14px; background: #24292e; color: #fff; border: 1px solid #444; padding: 10px; font-size: 13px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;" onclick="loginWithGithub()">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
           <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
@@ -12,10 +167,9 @@
         المتابعة باستخدام GitHub
       </button>
 
-      <!-- فاصل بين الطرق -->
       <div style="text-align: center; color: var(--text-muted); font-size: 11px; margin-bottom: 14px;">أو عبر البريد الإلكتروني</div>
 
-      <!-- 2️⃣ نموذج البريد الإلكتروني -->
+      <!-- نموذج البريد الإلكتروني -->
       <div class="form-group" style="margin-bottom: 10px;">
         <label>البريد الإلكتروني</label>
         <input type="email" id="authEmail" placeholder="name@example.com">
@@ -33,3 +187,185 @@
       </div>
     </div>
   </div>
+
+  <script>
+    // ✅ تم إدخال رابط مشروعك ومفتاحك بنجاح
+    const SUPABASE_URL = 'https://yepmpaqhjrutociwdszw.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable__PgAtBzZ1GXO8b-gEZiicw_btfZfauG';
+    
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    let currentUser = null;
+    let globalImageData = null;
+
+    // تتبع حالة التسجيل عند فتح الصفحة
+    document.addEventListener('DOMContentLoaded', async () => {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      updateAuthState(session?.user || null);
+
+      supabaseClient.auth.onAuthStateChange((_event, session) => {
+        updateAuthState(session?.user || null);
+      });
+    });
+
+    // تحديث الواجهة بناءً على حالة تسجيل الدخول والرصيد
+    async function updateAuthState(user) {
+      currentUser = user;
+      const authControls = document.getElementById('authControls');
+
+      if (user) {
+        const { data: profile } = await supabaseClient
+          .from('profiles')
+          .select('credits_left')
+          .eq('id', user.id)
+          .single();
+
+        const credits = profile ? profile.credits_left : 0;
+        authControls.innerHTML = `
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); padding: 4px 8px; border-radius: 20px; font-size: 11px;">
+              ⚡ الرصيد: ${credits}
+            </span>
+            <button class="btn-action" style="padding: 4px 8px;" onclick="supabaseClient.auth.signOut()">خروج</button>
+          </div>
+        `;
+        closeAuthModal();
+      } else {
+        authControls.innerHTML = `
+          <button class="btn-submit" style="padding: 6px 12px; font-size: 12px;" onclick="openAuthModal()">🔑 دخول / تسجيل</button>
+        `;
+      }
+    }
+
+    function openAuthModal() { document.getElementById('authModal').style.display = 'flex'; }
+    function closeAuthModal() { document.getElementById('authModal').style.display = 'none'; }
+
+    // دالة تسجيل الدخول عبر GitHub
+    async function loginWithGithub() {
+      const { data, error } = await supabaseClient.auth.signInWithOAuth({
+        provider: 'github',
+        options: {
+          redirectTo: window.location.origin
+        }
+      });
+
+      if (error) {
+        const errorDiv = document.getElementById('authError');
+        errorDiv.innerText = `❌ ${error.message}`;
+        errorDiv.style.display = 'block';
+      }
+    }
+
+    // دالة التسجيل والدخول بالبريد الإلكتروني
+    async function handleAuth(type) {
+      const email = document.getElementById('authEmail').value.trim();
+      const password = document.getElementById('authPassword').value;
+      const errorDiv = document.getElementById('authError');
+
+      errorDiv.style.display = 'none';
+      if (!email || !password) {
+        errorDiv.innerText = 'يرجى إدخال البريد وكلمة المرور.';
+        errorDiv.style.display = 'block';
+        return;
+      }
+
+      const res = (type === 'signup') 
+        ? await supabaseClient.auth.signUp({ email, password })
+        : await supabaseClient.auth.signInWithPassword({ email, password });
+
+      if (res.error) {
+        errorDiv.innerText = res.error.message;
+        errorDiv.style.display = 'block';
+      }
+    }
+
+    // معالجة رفع الصورة
+    function handleImage(e) {
+      const file = e.target.files[0];
+      if (file) {
+        document.getElementById('imagePreview').src = URL.createObjectURL(file);
+        document.getElementById('imagePreview').style.display = 'block';
+        document.getElementById('uploadText').innerText = file.name;
+        const reader = new FileReader();
+        reader.onload = () => globalImageData = { mimeType: file.type, data: reader.result.split(',')[1] };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function showStatus(msg, type) {
+      const alert = document.getElementById('statusAlert');
+      alert.className = `status-alert ${type}`;
+      alert.innerText = msg;
+      alert.style.display = 'block';
+    }
+
+    // توليد سيناريو الإعلان عبر AI
+    async function generateSaaSAd() {
+      if (!currentUser) {
+        openAuthModal();
+        return;
+      }
+
+      const productName = document.getElementById('productName').value.trim();
+      if (!productName) {
+        showStatus('يرجى ادخال اسم المنتج.', 'error');
+        return;
+      }
+
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
+      showStatus('⚡ جاري كتابة الإعلان...', 'loading');
+
+      const promptText = `
+أنت خبير إعلانات. اكتب سيناريو فيديو تسويقي عالي التحويل:
+- المنتج: ${productName}
+- المنصة: ${document.getElementById('platformSelect').value}
+- النبرة: ${document.getElementById('toneSelect').value}
+- الجمهور: ${document.getElementById('targetAudience').value}
+- التفاصيل: ${document.getElementById('productDescription').value}
+
+صمّم الإجابة بأسلوب مُنسّق:
+🎯 [اللقطة الخاطفة - Hook]
+🎙️ [السيناريو الصوتي - Voiceover Script]
+🎬 [وصف المشاهد المرئية - Visual Scenes]
+🚀 [دعوة لاتخاذ إجراء - Call To Action]
+      `;
+
+      try {
+        const res = await fetch('/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ promptText, imageData: globalImageData, userId: currentUser.id })
+        });
+        const data = await res.json();
+
+        if (data.error) {
+          showStatus(data.error, 'error');
+        } else {
+          document.getElementById('statusAlert').style.display = 'none';
+          document.getElementById('placeholderState').style.display = 'none';
+          document.getElementById('resultContent').style.display = 'flex';
+          document.getElementById('resultText').innerText = data.text;
+          updateAuthState(currentUser);
+        }
+      } catch (err) {
+        showStatus('حدث خطأ في الاتصال بالخادم.', 'error');
+      } finally {
+        submitBtn.disabled = false;
+      }
+    }
+
+    // تشغيل وإيقاف القراءة الصوتية ونسخ النص
+    function playSpeech() {
+      const text = document.getElementById('resultText').innerText;
+      if (!text) return;
+      stopSpeech();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'ar-SA';
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function stopSpeech() { window.speechSynthesis && window.speechSynthesis.cancel(); }
+    function copyResult() { navigator.clipboard.writeText(document.getElementById('resultText').innerText); alert('تم النسخ!'); }
+  </script>
+</body>
+</html>
