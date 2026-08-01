@@ -1,40 +1,62 @@
 export default async function handler(req, res) {
-  // قبول طلبات POST فقط
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
-  // قراءة المفتاح المحمي من متغيرات البيئة في Vercel
   const apiKey = process.env.GEMINI_API_KEY;
 
   if (!apiKey) {
-    return res.status(500).json({ error: 'لم يتم ضبط مفتاح GEMINI_API_KEY في السيرفر.' });
+    return res.status(500).json({ error: 'لم يتم العثور على مفتاح GEMINI_API_KEY في إعدادات Vercel.' });
   }
 
   try {
     const { promptText, imageData } = req.body;
-    const model = 'gemini-1.5-flash'; // النموذج المستقر
 
     const parts = [{ text: promptText }];
     if (imageData) {
-      parts.push({ inlineData: imageData });
+      parts.push({
+        inlineData: {
+          mimeType: imageData.mimeType,
+          data: imageData.data
+        }
+      });
     }
 
-    // إرسال الطلب إلى خوادم جوجل من السيرفر مباشرة
-    const googleResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ parts }] }),
-      }
-    );
+    // قائمة النماذج التي سيجربها السيرفر تلقائياً بالترتيب
+    const candidateModels = [
+      'gemini-1.5-flash',
+      'gemini-2.0-flash',
+      'gemini-1.5-flash-latest',
+      'gemini-1.5-pro'
+    ];
 
-    const data = await googleResponse.json();
-    return res.status(googleResponse.status).json(data);
+    let lastError = null;
+
+    for (const model of candidateModels) {
+      const googleResponse = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: [{ parts }] }),
+        }
+      );
+
+      const data = await googleResponse.json();
+
+      // إذا نجح التوليد مع النموذج، أرجع النتيجة فوراً
+      if (googleResponse.ok && !data.error) {
+        return res.status(200).json(data);
+      }
+
+      lastError = data.error;
+    }
+
+    // إذا لم يعمل أي نموذج من القائمة، قم بإرجاع الخطأ
+    return res.status(400).json({ error: lastError });
 
   } catch (error) {
-    console.error('Server Function Error:', error);
-    return res.status(500).json({ error: 'حدث خطأ في الخادم الداخلي.' });
+    console.error('Server Error:', error);
+    return res.status(500).json({ error: 'حدث خطأ في معالجة الطلب داخل الخادم.' });
   }
 }
