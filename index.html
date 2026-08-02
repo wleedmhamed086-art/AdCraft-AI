@@ -13,7 +13,7 @@
   <!-- Supabase JS Client -->
   <script src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'></script>
   
-  <!-- PayPal SDK (تم إصلاح الرمز & إلى &amp;) -->
+  <!-- PayPal SDK (استبدل YOUR_PAYPAL_CLIENT_ID بمعرف حسابك في PayPal) -->
   <script src='https://www.paypal.com/sdk/js?client-id=BAAFWWpIY4D_hK1yAEucAl284olw7jeiFzk3b5egoUqs-RSZxqRLMSL3YUgwrXAizBw32umAfVhgPFkrmE&amp;currency=USD'></script>
 
   <!-- وسم b:skin الإجباري لبلوجر محمي بـ CDATA -->
@@ -133,12 +133,13 @@
     .modal {
       display: none;
       position: fixed;
-      top:0; left:0; width:100%; height:100%;
-      background: rgba(0,0,0,0.8);
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.8);
       justify-content: center;
       align-items: center;
       z-index: 1000;
     }
+
     .modal-content {
       background: #1e293b;
       padding: 30px;
@@ -153,9 +154,18 @@
   <div class='container'>
     <header>
       <h2>⚡ مولد الإعلانات الذكي</h2>
-      <div>
+      
+      <!-- قسم زائر غير مسجل -->
+      <div id='auth-logged-out' style='display: none;'>
+        <button onclick="openAuthModal('login')" style='padding: 8px 16px; border-radius: 8px; cursor: pointer; background: var(--accent-color); color: white; border: none; font-weight: bold;'>تسجيل الدخول</button>
+      </div>
+
+      <!-- قسم مستخدم مسجل دخول -->
+      <div id='auth-logged-in' style='display: none; align-items: center; gap: 10px;'>
         <span class='credits-badge'>النقاط: <span id='credits-count'>0</span></span>
-        <button onclick='openChargeModal()' style='margin-right: 10px; padding: 6px 12px; border-radius: 8px; cursor: pointer;'>شحن</button>
+        <button onclick='openChargeModal()' style='padding: 6px 12px; border-radius: 8px; cursor: pointer;'>شحن</button>
+        <span id='user-email-display' style='font-size: 0.85em; color: var(--text-muted);'></span>
+        <button onclick='handleLogout()' style='padding: 6px 12px; border-radius: 8px; cursor: pointer; background: #ef4444; color: white; border: none;'>خروج</button>
       </div>
     </header>
 
@@ -223,20 +233,58 @@
     </div>
   </div>
 
+  <!-- Modal تسجيل الدخول وإنشاء الحساب -->
+  <div class='modal' id='auth-modal'>
+    <div class='modal-content'>
+      <h3 id='auth-title' style='margin-bottom: 20px;'>تسجيل الدخول</h3>
+      
+      <form id='auth-form'>
+        <div class='form-group'>
+          <label for='auth-email'>البريد الإلكتروني</label>
+          <input id='auth-email' required='required' type='email' placeholder='name@example.com'/>
+        </div>
+        
+        <div class='form-group'>
+          <label for='auth-password'>كلمة المرور</label>
+          <input id='auth-password' required='required' type='password' placeholder='••••••••'/>
+        </div>
+
+        <button class='btn' id='auth-submit-btn' type='submit'>دخول</button>
+      </form>
+
+      <div style='margin-top: 15px; text-align: center; font-size: 0.9em; color: var(--text-muted);'>
+        <span id='auth-toggle-text'>ليس لديك حساب؟</span> 
+        <a href='javascript:void(0)' id='auth-toggle-link' onclick='toggleAuthMode()' style='color: var(--accent-color); font-weight: bold; text-decoration: none;'>إنشاء حساب جديد</a>
+      </div>
+
+      <button onclick='closeAuthModal()' style='margin-top: 15px; width: 100%; padding: 10px; background: transparent; color: var(--text-muted); border: none; cursor: pointer;'>إلغاء</button>
+    </div>
+  </div>
+
   <script type='text/javascript'>
     /* <![CDATA[ */
-    // 1. إعدادات Supabase ورابط السيرفر المباشر على Vercel
-    const SUPABASE_URL = "https://your-project-id.supabase.co"; // ضع رابط مشروع Supabase الخاص بك
-    const SUPABASE_ANON_KEY = "your_supabase_anon_key";          // ضع مفتاح Anon الخاص بك
-    const API_BASE_URL = "https://ad-craft-ai-phi.vercel.app/api"; // رابط Vercel المباشر
+    // 1. الإعدادات والمفاتيح
+    const SUPABASE_URL = "https://your-project-id.supabase.co"; // ضع رابط مشروعك الخاص بـ Supabase هنا
+    const SUPABASE_ANON_KEY = "sb_publishable__PgAtBzZ1GXO8b-gEZiicw_btfZfauG"; // المفتاح العلني الخاص بك
+    const API_BASE_URL = "https://ad-craft-ai-phi.vercel.app/api"; // رابط خادم Vercel المباشر
 
     const supabase = supabasejs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    let currentAuthMode = 'login';
 
-    // 2. التحقق من الجلسة وتحديث النقاط عند الفتح
-    document.addEventListener('DOMContentLoaded', async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+    // 2. إدارة جلسة المستخدم (Auth Listener)
+    supabase.auth.onAuthStateChange((event, session) => {
+      const loggedOutDiv = document.getElementById('auth-logged-out');
+      const loggedInDiv = document.getElementById('auth-logged-in');
+
       if (session) {
-        await fetchUserProfile(session);
+        loggedOutDiv.style.display = 'none';
+        loggedInDiv.style.display = 'flex';
+        document.getElementById('user-email-display').innerText = session.user.email;
+        fetchUserProfile(session);
+      } else {
+        loggedOutDiv.style.display = 'block';
+        loggedInDiv.style.display = 'none';
+        document.getElementById('credits-count').innerText = '0';
       }
     });
 
@@ -252,7 +300,75 @@
       }
     }
 
-    // 3. إرسال طلب التوليد للسيرفر
+    // 3. إدارة نافذة تسجيل الدخول/التسجيل (Modal)
+    function openAuthModal(mode = 'login') {
+      currentAuthMode = mode;
+      updateAuthModalUI();
+      document.getElementById('auth-modal').style.display = 'flex';
+    }
+
+    function closeAuthModal() {
+      document.getElementById('auth-modal').style.display = 'none';
+    }
+
+    function toggleAuthMode() {
+      currentAuthMode = currentAuthMode === 'login' ? 'signup' : 'login';
+      updateAuthModalUI();
+    }
+
+    function updateAuthModalUI() {
+      const title = document.getElementById('auth-title');
+      const submitBtn = document.getElementById('auth-submit-btn');
+      const toggleText = document.getElementById('auth-toggle-text');
+      const toggleLink = document.getElementById('auth-toggle-link');
+
+      if (currentAuthMode === 'login') {
+        title.innerText = 'تسجيل الدخول';
+        submitBtn.innerText = 'دخول';
+        toggleText.innerText = 'ليس لديك حساب؟';
+        toggleLink.innerText = 'إنشاء حساب جديد';
+      } else {
+        title.innerText = 'إنشاء حساب جديد';
+        submitBtn.innerText = 'تسجيل حساب جديد';
+        toggleText.innerText = 'لديك حساب بالفعل؟';
+        toggleLink.innerText = 'تسجيل الدخول';
+      }
+    }
+
+    document.getElementById('auth-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('auth-email').value;
+      const password = document.getElementById('auth-password').value;
+      const submitBtn = document.getElementById('auth-submit-btn');
+
+      submitBtn.disabled = true;
+      submitBtn.innerText = 'جاري المعالجة...';
+
+      try {
+        if (currentAuthMode === 'login') {
+          const { error } = await supabase.auth.signInWithPassword({ email, password });
+          if (error) throw error;
+          closeAuthModal();
+        } else {
+          const { error } = await supabase.auth.signUp({ email, password });
+          if (error) throw error;
+          alert('✅ تم إنشاء الحساب بنجاح!');
+          closeAuthModal();
+        }
+      } catch (err) {
+        alert(`❌ خطأ: ${err.message}`);
+      } finally {
+        submitBtn.disabled = false;
+        updateAuthModalUI();
+      }
+    });
+
+    async function handleLogout() {
+      const { error } = await supabase.auth.signOut();
+      if (error) alert(error.message);
+    }
+
+    // 4. إرسال طلب التوليد للذكاء الاصطناعي
     const adForm = document.getElementById('ad-form');
     const submitBtn = document.getElementById('submit-btn');
 
@@ -261,7 +377,8 @@
 
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        alert('يرجى تسجيل الدخول أولاً لتوليد الإعلانات.');
+        openAuthModal('login');
+        alert('يرجى تسجيل الدخول أو إنشاء حساب أولاً لتوليد الإعلانات.');
         return;
       }
 
@@ -301,7 +418,7 @@
       }
     });
 
-    // 4. دالة النسخ مع Fallback للحماية
+    // 5. دالة النسخ
     function copyResult() {
       const text = document.getElementById('result-text').innerText;
       if (navigator.clipboard) {
@@ -317,7 +434,7 @@
       }
     }
 
-    // 5. إدارة نافذة PayPal والدفع
+    // 6. شحن النقاط عبر PayPal
     function openChargeModal() {
       const modal = document.getElementById('charge-modal');
       const paypalContainer = document.getElementById('paypal-button-container');
@@ -328,9 +445,7 @@
       paypal.Buttons({
         createOrder: (data, actions) => {
           return actions.order.create({
-            purchase_units: [{
-              amount: { value: '4.99' }
-            }]
+            purchase_units: [{ amount: { value: '4.99' } }]
           });
         },
         onApprove: async (data, actions) => {
