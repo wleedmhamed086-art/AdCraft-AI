@@ -1,444 +1,373 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>AdCraft AI | صانع الإعلانات بالذكاء الاصطناعي</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مولد الإعلانات بالذكاء الاصطناعي</title>
   
-  <!-- Tailwind CSS & FontAwesome Icons -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
-  
-  <!-- Supabase JS Client v2 -->
+  <!-- Supabase JS Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <!-- PayPal SDK With Sandbox Client ID -->
-  <script src="https://www.paypal.com/sdk/js?client-id=BAAFWWpIY4D_hK1yAEucAl284olw7jeiFzk3b5egoUqs-RSZxqRLMSL3YUgwrXAizBw32umAfVhgPFkrmE=USD"></script>
   
+  <!-- PayPal SDK (استبدل YOUR_PAYPAL_CLIENT_ID بالمفتاح الخاص بك) -->
+  <script src="https://www.paypal.com/sdk/js?client-id=YOUR_PAYPAL_CLIENT_ID&currency=USD"></script>
+
   <style>
-    body {
-      background-color: #0b0f19;
-      color: #f3f4f6;
-      font-family: system-ui, -apple-system, sans-serif;
+    :root {
+      --bg-dark: #0f172a;
+      --card-bg: rgba(30, 41, 59, 0.7);
+      --accent-color: #6366f1;
+      --accent-hover: #4f46e5;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: rgba(255, 255, 255, 0.1);
     }
-    .glass-card {
-      background: rgba(17, 24, 39, 0.7);
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+    body { background: var(--bg-dark); color: var(--text-main); min-height: 100vh; padding: 20px; }
+
+    .container { max-width: 900px; margin: 0 auto; }
+    
+    /* Dark Glassmorphism Header */
+    header {
+      background: var(--card-bg);
       backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border-color);
+      padding: 15px 25px;
+      border-radius: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
     }
-    .glow-purple {
-      box-shadow: 0 0 25px -5px rgba(124, 58, 237, 0.3);
+
+    .credits-badge {
+      background: rgba(99, 102, 241, 0.2);
+      border: 1px solid var(--accent-color);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-weight: bold;
     }
-    .ad-slot-placeholder {
-      background: rgba(31, 41, 55, 0.4);
-      border: 1px dashed rgba(107, 114, 128, 0.4);
+
+    /* Main Form Glass Card */
+    .glass-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-color);
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      margin-bottom: 25px;
+    }
+
+    .form-group { margin-bottom: 20px; }
+    label { display: block; margin-bottom: 8px; color: var(--text-muted); font-size: 0.9em; }
+    
+    input, textarea, select {
+      width: 100%;
+      padding: 12px;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      color: var(--text-main);
+      font-size: 1rem;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: var(--accent-color);
+    }
+
+    .btn {
+      background: var(--accent-color);
+      color: white;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      width: 100%;
+      transition: background 0.2s ease;
+    }
+
+    .btn:hover { background: var(--accent-hover); }
+    .btn:disabled { background: #475569; cursor: not-allowed; }
+
+    /* Output Section */
+    .result-box {
+      margin-top: 20px;
+      white-space: pre-wrap;
+      background: rgba(15, 23, 42, 0.8);
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      position: relative;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8em;
+    }
+
+    /* Ad Slot Placeholder */
+    .ad-slot {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px dashed var(--border-color);
+      padding: 20px;
+      text-align: center;
+      color: var(--text-muted);
+      border-radius: 12px;
+      margin: 20px 0;
+    }
+
+    /* Modal for Charging */
+    .modal {
+      display: none;
+      position: fixed;
+      top:0; left:0; width:100%; height:100%;
+      background: rgba(0,0,0,0.8);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal-content {
+      background: #1e293b;
+      padding: 30px;
+      border-radius: 16px;
+      max-width: 450px;
+      width: 90%;
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between">
+<body>
 
-  <!-- 📢 AD SLOT 1: TOP HEADER BANNER -->
-  <div class="w-full bg-gray-900/80 border-b border-gray-800 py-2 text-center text-xs text-gray-400">
-    <div class="max-w-7xl mx-auto px-4 flex items-center justify-center min-h-[50px] ad-slot-placeholder rounded-lg my-1">
-      <span><i class="fa-solid fa-rectangle-ad text-indigo-400 ml-1"></i> مساحة إعلانية مخصصة (728x90 Top Banner)</span>
-    </div>
+  <div class="container">
+    <header>
+      <h2>⚡ مولد الإعلانات الذكي</h2>
+      <div>
+        <span class="credits-badge">النقاط: <span id="credits-count">0</span></span>
+        <button onclick="openChargeModal()" style="margin-right: 10px; padding: 6px 12px; border-radius: 8px; cursor: pointer;">شحن</button>
+      </div>
+    </header>
+
+    <!-- إعلان علوي -->
+    <div class="ad-slot">مساحة إعلانية (AdSlot Top)</div>
+
+    <main class="glass-card">
+      <form id="ad-form">
+        <div class="form-group">
+          <label for="productName">اسم المنتج أو الخدمة</label>
+          <input type="text" id="productName" placeholder="مثال: تطبيق تنظيم الوقت" required>
+        </div>
+
+        <div class="form-group">
+          <label for="productDesc">تفاصيل ومميزات المنتج</label>
+          <textarea id="productDesc" rows="4" placeholder="اكتب أهم الفوائد والمميزات..." required></textarea>
+        </div>
+
+        <div style="display: flex; gap: 15px;">
+          <div class="form-group" style="flex: 1;">
+            <label for="tone">نغمة الخطاب</label>
+            <select id="tone">
+              <option value="حماسية وجذابة">حماسية وجذابة</option>
+              <option value="احترافية ورسمية">احترافية ورسمية</option>
+              <option value="وديّة وفكاهية">وديّة وفكاهية</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="flex: 1;">
+            <label for="platform">المنصة الإعلانية</label>
+            <select id="platform">
+              <option value="Facebook">فيسبوك (Facebook)</option>
+              <option value="Instagram">إنستغرام (Instagram)</option>
+              <option value="TikTok">تيك توك (TikTok)</option>
+              <option value="Google Ads">إعلانات جوجل</option>
+            </select>
+          </div>
+        </div>
+
+        <button type="submit" id="submit-btn" class="btn">توليد النص الإعلاني (1 نقطة)</button>
+      </form>
+
+      <div id="result-container" style="display: none;">
+        <div class="result-box">
+          <button class="copy-btn" onclick="copyResult()">نسخ النص 📋</button>
+          <div id="result-text"></div>
+        </div>
+      </div>
+    </main>
+
+    <!-- إعلان سفلي -->
+    <div class="ad-slot">مساحة إعلانية (AdSlot Bottom)</div>
   </div>
 
-  <!-- 🌐 NAVBAR -->
-  <header class="sticky top-0 z-40 glass-card border-b border-gray-800">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      
-      <!-- Logo -->
-      <div class="flex items-center space-x-3 space-x-reverse">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-indigo-500/30">
-          ✨
-        </div>
-        <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-gray-200 to-indigo-400">
-          AdCraft AI
-        </span>
-      </div>
-
-      <!-- User Credits & Actions -->
-      <div class="flex items-center gap-4">
-        <!-- Live Credits Counter -->
-        <div class="flex items-center gap-2 bg-indigo-950/60 border border-indigo-500/30 px-3 py-1.5 rounded-full text-sm font-semibold text-indigo-300">
-          <i class="fa-solid fa-bolt text-yellow-400 animate-pulse"></i>
-          <span>الرصيد: <strong id="creditsDisplay" class="text-white">0</strong> نقاط</span>
-        </div>
-
-        <div id="userAuthSection">
-          <button onclick="openAuthModal()" class="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-sm font-medium px-4 py-2 rounded-xl transition-all glow-purple">
-            تسجيل الدخول
-          </button>
-        </div>
-      </div>
-    </div>
-  </header>
-
-  <!-- 🚀 MAIN CONTENT -->
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow">
-    
-    <!-- Hero Section -->
-    <div class="text-center max-w-3xl mx-auto mb-10">
-      <h1 class="text-3xl sm:text-5xl font-extrabold text-white leading-tight mb-4">
-        أنشئ نصوص إعلانية <span class="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-violet-400">احترافية ومحولة</span> في ثوانٍ
-      </h1>
-      <p class="text-gray-400 text-sm sm:text-base">
-        استخدم قوى الذكاء الاصطناعي لتوليد سيناريوهات إعلانية مخصصة لمنتجاتك ومناسبة لحملاتك الإعلانية.
-      </p>
-    </div>
-
-    <!-- Generator & Sidebar Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-      
-      <!-- Generator Form (2 Columns) -->
-      <div class="lg:col-span-2 glass-card p-6 sm:p-8 rounded-2xl shadow-xl">
-        <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
-          <i class="fa-solid fa-wand-magic-sparkles text-indigo-400"></i>
-          مولد الإعلانات
-        </h2>
-
-        <form id="adForm" class="space-y-5">
-          <div>
-            <label class="block text-sm font-medium text-gray-300 mb-2">اسم المنتج أو الخدمة</label>
-            <input type="text" id="productName" required placeholder="مثال: عطر رجالي فاخر ثبات 24 ساعة" 
-              class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"/>
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-gray-300 mb-2">الوصف والمميزات الرئيسية</label>
-            <textarea id="productDesc" rows="3" required placeholder="أدخل تفاصيل ومميزات المنتج الرئيسية..." 
-              class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"></textarea>
-          </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-300 mb-2">نغمة الخطاب</label>
-              <select id="tone" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500">
-                <option value="حماسي وجذاب">حماسي وجذاب 🔥</option>
-                <option value="احترافي ورسمي">احترافي ورسمي 💼</option>
-                <option value="فكاهي ولطيف">فكاهي ولطيف 😂</option>
-                <option value="عاطفي ومؤثر">عاطفي ومؤثر ❤️</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-300 mb-2">منصة الإعلان</label>
-              <select id="platform" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500">
-                <option value="TikTok / Reels">TikTok & Reels (فيديو قصير)</option>
-                <option value="Facebook / Instagram">Facebook & Instagram (نص صريح)</option>
-                <option value="Snapchat">Snapchat (سريع ومباشر)</option>
-              </select>
-            </div>
-          </div>
-
-          <button type="submit" id="generateBtn" 
-            class="w-full bg-gradient-to-r from-indigo-600 via-purple-600 to-violet-600 hover:opacity-95 text-white font-bold py-3.5 rounded-xl transition duration-200 flex items-center justify-center gap-2 glow-purple">
-            <i class="fa-solid fa-bolt"></i>
-            <span id="btnText">توليد الإعلان (تخصم 1 نقطة)</span>
-          </button>
-        </form>
-
-        <!-- Result Box -->
-        <div id="resultContainer" class="hidden mt-8 pt-6 border-t border-gray-800">
-          <div class="flex items-center justify-between mb-3">
-            <h3 class="text-lg font-bold text-emerald-400 flex items-center gap-2">
-              <i class="fa-solid fa-circle-check"></i> النص الإعلاني المقترح:
-            </h3>
-            <button onclick="copyResult()" class="text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded-lg border border-gray-700 flex items-center gap-1">
-              <i class="fa-regular fa-copy"></i> نسخ
-            </button>
-          </div>
-          <div id="resultText" class="bg-gray-900/90 border border-gray-700 rounded-xl p-5 text-gray-200 leading-relaxed whitespace-pre-line text-sm">
-          </div>
-        </div>
-      </div>
-
-      <!-- Sidebar Ads & Widgets (1 Column) -->
-      <div class="space-y-6">
-        
-        <!-- 📢 AD SLOT 2: SIDEBAR RECTANGLE AD -->
-        <div class="glass-card p-4 rounded-2xl text-center min-h-[300px] flex flex-col items-center justify-center ad-slot-placeholder">
-          <span class="text-xs text-gray-500 mb-2">إعلان رعاية</span>
-          <div class="text-gray-400 text-sm">
-            <i class="fa-solid fa-ad text-3xl mb-2 text-indigo-400"></i>
-            <p>مساحة إعلانية جانبية (300x250 Banner)</p>
-          </div>
-        </div>
-
-        <!-- Mini Feature Box -->
-        <div class="glass-card p-5 rounded-2xl border border-indigo-500/20">
-          <h4 class="font-bold text-white text-sm mb-2 flex items-center gap-2">
-            <i class="fa-solid fa-shield-halved text-indigo-400"></i> جودة عالية ومضمنة
-          </h4>
-          <p class="text-xs text-gray-400 leading-relaxed">
-            جميع النصوص يتم صياغتها عبر أفضل نماذج الذكاء الاصطناعي لتعطيك أعلى نسبة تحويل للمبيعات.
-          </p>
-        </div>
-
-      </div>
-
-    </div>
-
-    <!-- 💳 PRICING / PACKAGES SECTION -->
-    <section id="pricingSection" class="mt-20 pt-10 border-t border-gray-800">
-      <div class="text-center mb-10">
-        <h2 class="text-2xl sm:text-3xl font-bold text-white mb-2">باقات شحن النقاط</h2>
-        <p class="text-gray-400 text-sm">اختر الباقة المناسبة لاحتياجاتك واشحن رصيدك فوراً عبر PayPal</p>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-        <!-- Package 1 -->
-        <div class="glass-card p-6 sm:p-8 rounded-2xl border border-gray-800 hover:border-indigo-500/50 transition relative">
-          <h3 class="text-xl font-bold text-white mb-2">الباقة الأساسية</h3>
-          <p class="text-gray-400 text-xs mb-4">مثالية للتجربة والأعمال الصغيرة</p>
-          <div class="text-3xl font-extrabold text-white mb-6">$5.00 <span class="text-sm font-normal text-gray-400">/ 50 نقطة</span></div>
-          <div id="paypal-button-basic"></div>
-        </div>
-
-        <!-- Package 2 -->
-        <div class="glass-card p-6 sm:p-8 rounded-2xl border border-indigo-500/50 relative glow-purple">
-          <span class="absolute -top-3 right-6 bg-indigo-600 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">الأكثر شعبية</span>
-          <h3 class="text-xl font-bold text-white mb-2">الباقة الاحترافية</h3>
-          <p class="text-gray-400 text-xs mb-4">لأصحاب المسوقين والوكالات الإعلانية</p>
-          <div class="text-3xl font-extrabold text-white mb-6">$15.00 <span class="text-sm font-normal text-gray-400">/ 200 نقطة</span></div>
-          <div id="paypal-button-pro"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 📢 AD SLOT 3: BOTTOM FOOTER BANNER -->
-    <div class="mt-16 text-center">
-      <div class="max-w-4xl mx-auto min-h-[90px] ad-slot-placeholder rounded-2xl flex items-center justify-center text-xs text-gray-500 p-4">
-        <span><i class="fa-solid fa-rectangle-ad text-indigo-400 ml-1"></i> مساحة إعلانية سفلية عريضة (728x90 Footer Banner)</span>
-      </div>
-    </div>
-
-  </main>
-
-  <!-- 🔐 AUTH MODAL -->
-  <div id="authModal" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden z-50 flex items-center justify-center p-4">
-    <div class="glass-card max-w-md w-full p-6 sm:p-8 rounded-2xl border border-gray-700 relative text-center">
-      <button onclick="closeAuthModal()" class="absolute top-4 left-4 text-gray-400 hover:text-white">
-        <i class="fa-solid fa-xmark text-xl"></i>
-      </button>
-      
-      <div class="w-12 h-12 bg-indigo-600/20 text-indigo-400 rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl">
-        <i class="fa-solid fa-user-lock"></i>
-      </div>
-      
-      <h3 class="text-xl font-bold text-white mb-2">تسجيل الدخول / حساب جديد</h3>
-      <p class="text-gray-400 text-xs mb-6">اختر وسيلتك المفضلة للدخول فوراً والبدء في توليد الإعلانات</p>
-
-      <!-- Social Login Buttons -->
-      <div class="space-y-3">
-        <!-- Google -->
-        <button onclick="loginWithProvider('google')" class="w-full bg-white hover:bg-gray-100 text-gray-900 font-medium py-3 rounded-xl transition flex items-center justify-center gap-3 text-sm">
-          <i class="fa-brands fa-google text-red-500 text-lg"></i>
-          <span>المتابعة باستخدام Google</span>
-        </button>
-
-        <!-- GitHub -->
-        <button onclick="loginWithProvider('github')" class="w-full bg-gray-800 hover:bg-gray-700 text-white font-medium py-3 rounded-xl transition flex items-center justify-center gap-3 text-sm border border-gray-700">
-          <i class="fa-brands fa-github text-lg"></i>
-          <span>المتابعة باستخدام GitHub</span>
-        </button>
-
-        <!-- Facebook -->
-        <button onclick="loginWithProvider('facebook')" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-xl transition flex items-center justify-center gap-3 text-sm">
-          <i class="fa-brands fa-facebook-f text-lg"></i>
-          <span>المتابعة باستخدام Facebook</span>
-        </button>
-      </div>
+  <!-- Modal شحن النقاط -->
+  <div id="charge-modal" class="modal">
+    <div class="modal-content">
+      <h3 style="margin-bottom: 15px;">شحن رصيد النقاط</h3>
+      <p style="margin-bottom: 20px; color: var(--text-muted);">باقة 10 نقاط بـ $4.99 دولار</p>
+      <div id="paypal-button-container"></div>
+      <button onclick="closeChargeModal()" style="margin-top: 15px; width: 100%; padding: 10px; background: transparent; color: var(--text-muted); border: none; cursor: pointer;">إلغاء</button>
     </div>
   </div>
-
-  <!-- 🦶 FOOTER -->
-  <footer class="border-t border-gray-800/80 bg-gray-950/60 py-6 text-center text-xs text-gray-500">
-    <div class="max-w-7xl mx-auto px-4">
-      <p>© 2026 AdCraft AI. جميع الحقوق محفوظة.</p>
-    </div>
-  </footer>
 
   <script>
-    // 1. Supabase Client Setup
-    const SUPABASE_URL = "https://yepmpaqhjrutociwdszw.supabase.co";
-    // ملاحظة: استبدل النص أدناه بـ anon key الخاص بك من Supabase Settings -> API Keys
-    const SUPABASE_ANON_KEY = "sb_publishable__PgAtBzZ1GXO8b-gEZiicw_btfZfauG"; 
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // 1. إعداد Supabase Client
+    const SUPABASE_URL = "https://your-project-id.supabase.co";
+    const SUPABASE_ANON_KEY = "your_supabase_anon_key";
+    const API_BASE_URL = "http://localhost:3000/api"; // عنوان سيرفر الـ Backend
 
-    let currentUser = null;
+    const supabase = supabasejs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // 2. Modal Functions
-    function openAuthModal() {
-      document.getElementById('authModal').classList.remove('hidden');
-    }
-    function closeAuthModal() {
-      document.getElementById('authModal').classList.add('hidden');
-    }
-
-    function scrollToPricing() {
-      document.getElementById('pricingSection').scrollIntoView({ behavior: 'smooth' });
-    }
-
-    function copyResult() {
-      const text = document.getElementById('resultText').innerText;
-      navigator.clipboard.writeText(text);
-      alert('تم نسخ النص الإعلاني بنجاح!');
-    }
-
-    // 3. Auth Actions
-    async function loginWithProvider(providerName) {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: providerName,
-        options: { redirectTo: window.location.origin }
-      });
-      if (error) alert("فشل تسجيل الدخول: " + error.message);
-    }
-
-    async function logout() {
-      await supabase.auth.signOut();
-      window.location.reload();
-    }
-
-    // 4. Session State & Live Credits
-    supabase.auth.onAuthStateChange(async (event, session) => {
-      if (session && session.user) {
-        currentUser = session.user;
-        closeAuthModal();
-
-        // Fetch User Credits
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('credits_left')
-          .eq('id', currentUser.id)
-          .single();
-
-        if (profile) {
-          document.getElementById('creditsDisplay').innerText = profile.credits_left;
-        }
-
-        // Render User Logged In UI
-        document.getElementById('userAuthSection').innerHTML = `
-          <div class="flex items-center gap-3">
-            <button onclick="scrollToPricing()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3 py-2 rounded-xl">شحن النقاط</button>
-            <button onclick="logout()" class="text-xs text-gray-400 hover:text-red-400">خروج</button>
-          </div>
-        `;
+    // 2. إدارة الجلسات وتحديث النقاط عند التحميل
+    document.addEventListener('DOMContentLoaded', async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        // يمكنك توجيه المستخدم لصفحة تسجيل الدخول إذا لم يكن مسجلاً
+        console.log('المستخدم غير مفرس الجلسة');
       } else {
-        currentUser = null;
-        document.getElementById('creditsDisplay').innerText = "0";
-        document.getElementById('userAuthSection').innerHTML = `
-          <button onclick="openAuthModal()" class="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-sm font-medium px-4 py-2 rounded-xl transition-all glow-purple">
-            تسجيل الدخول
-          </button>
-        `;
+        await fetchUserProfile(session);
       }
     });
 
-    // 5. Generator Form Submission
-    const adForm = document.getElementById('adForm');
-    const generateBtn = document.getElementById('generateBtn');
-    const btnText = document.getElementById('btnText');
-    const resultContainer = document.getElementById('resultContainer');
-    const resultText = document.getElementById('resultText');
+    // جلب ملف المستخدم لمعرفة النقاط
+    async function fetchUserProfile(session) {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('credits_left')
+        .eq('id', session.user.id)
+        .single();
+
+      if (data) {
+        document.getElementById('credits-count').innerText = data.credits_left;
+      }
+    }
+
+    // 3. معالجة نموذج التوليد وإرسال التوكن لـ API السيرفر
+    const adForm = document.getElementById('ad-form');
+    const submitBtn = document.getElementById('submit-btn');
 
     adForm.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      if (!currentUser) {
-        openAuthModal();
+      // جلب توكن الجلسة من Supabase
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        alert('يرجى تسجيل الدخول أولاً لتوليد الإعلانات.');
         return;
       }
-      
-      const productName = document.getElementById('productName').value;
-      const productDesc = document.getElementById('productDesc').value;
-      const tone = document.getElementById('tone').value;
-      const platform = document.getElementById('platform').value;
 
-      generateBtn.disabled = true;
-      btnText.innerText = 'جاري التوليد...';
+      // إيقاف الزر لمنع الضغط المتكرر
+      submitBtn.disabled = true;
+      submitBtn.innerText = 'جاري التوليد بالذكاء الاصطناعي... ⏳';
 
       try {
-        const response = await fetch('/api/generate', {
+        const response = await fetch(`${API_BASE_URL}/generate`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ productName, productDesc, tone, platform, userId: currentUser.id })
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}` // إرسال التوكن بأمان
+          },
+          body: JSON.stringify({
+            productName: document.getElementById('productName').value,
+            productDesc: document.getElementById('productDesc').value,
+            tone: document.getElementById('tone').value,
+            platform: document.getElementById('platform').value
+          })
         });
 
         const data = await response.json();
 
-        if (response.ok && data.result) {
-          resultText.innerText = data.result;
-          resultContainer.classList.remove('hidden');
-          if (data.creditsLeft !== undefined) {
-            document.getElementById('creditsDisplay').innerText = data.creditsLeft;
-          }
-        } else {
-          alert(data.error || 'حدث خطأ أثناء توليد الإعلان. يرجى التحقق من الرصيد.');
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || 'حدث خطأ غير متوقع أثناء التوليد');
         }
+
+        // عرض النتيجة وتحديث الرصيد
+        document.getElementById('result-text').innerText = data.result;
+        document.getElementById('result-container').style.display = 'block';
+        document.getElementById('credits-count').innerText = data.creditsLeft;
+
       } catch (err) {
-        alert('فشل الاتصال بالخادم. يرجى المحاولة لاحقاً.');
+        alert(`❌ تنبيه: ${err.message}`);
       } finally {
-        generateBtn.disabled = false;
-        btnText.innerText = 'توليد الإعلان (تخصم 1 نقطة)';
+        // إعادة الزر لربط العمليات القادمة
+        submitBtn.disabled = false;
+        submitBtn.innerText = 'توليد النص الإعلاني (1 نقطة)';
       }
     });
 
-    // 6. PayPal Buttons Render
-    if (window.paypal) {
-      // Basic Package ($5)
-      paypal.Buttons({
-        createOrder: (data, actions) => {
-          if (!currentUser) {
-            openAuthModal();
-            return actions.reject();
-          }
-          return actions.order.create({ purchase_units: [{ amount: { value: '5.00' } }] });
-        },
-        onApprove: (data, actions) => {
-          return fetch('/api/paypal-capture', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ orderID: data.orderID, userId: currentUser.id, creditsToAdd: 50 })
-          })
-          .then(res => res.json())
-          .then(data => {
-            if (data.success) {
-              alert('🎉 تم شحن 50 نقطة بنجاح!');
-              location.reload();
-            } else {
-              alert('حدثت مشكلة أثناء تأكيد الدفع.');
-            }
-          });
-        }
-      }).render('#paypal-button-basic');
+    // 4. دالة النسخ مع Fallback للحماية
+    function copyResult() {
+      const text = document.getElementById('result-text').innerText;
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(() => alert('تم النسخ بنجاح!'));
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        alert('تم النسخ بنجاح!');
+      }
+    }
 
-      // Pro Package ($15)
+    // 5. إدارة نافذة PayPal والدفع
+    function openChargeModal() {
+      const modal = document.getElementById('charge-modal');
+      const paypalContainer = document.getElementById('paypal-button-container');
+      
+      // تفريغ الحاوية لمنع تكرار الرسم
+      paypalContainer.innerHTML = '';
+      modal.style.display = 'flex';
+
+      // رسم أزرار PayPal
       paypal.Buttons({
         createOrder: (data, actions) => {
-          if (!currentUser) {
-            openAuthModal();
-            return actions.reject();
-          }
-          return actions.order.create({ purchase_units: [{ amount: { value: '15.00' } }] });
-        },
-        onApprove: (data, actions) => {
-          return fetch('/api/paypal-capture', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ orderID: data.orderID, userId: currentUser.id, creditsToAdd: 200 })
-          })
-          .then(res => res.json())
-          .then(data => {
-            if (data.success) {
-              alert('🎉 تم شحن 200 نقطة بنجاح!');
-              location.reload();
-            } else {
-              alert('حدثت مشكلة أثناء تأكيد الدفع.');
-            }
+          return actions.order.create({
+            purchase_units: [{
+              amount: { value: '4.99' }
+            }]
           });
+        },
+        onApprove: async (data, actions) => {
+          const order = await actions.order.capture();
+          const { data: { session } } = await supabase.auth.getSession();
+
+          // تأكيد العملية في السيرفر
+          const res = await fetch(`${API_BASE_URL}/paypal-capture`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${session.access_token}`
+            },
+            body: JSON.stringify({
+              orderID: order.id,
+              creditsToAdd: 10
+            })
+          });
+
+          const resultData = await res.json();
+          if (resultData.success) {
+            document.getElementById('credits-count').innerText = resultData.newCredits;
+            alert('تم شحن 10 نقاط بنجاح!');
+            closeChargeModal();
+          }
         }
-      }).render('#paypal-button-pro');
+      }).render('#paypal-button-container');
+    }
+
+    function closeChargeModal() {
+      document.getElementById('charge-modal').style.display = 'none';
     }
   </script>
 </body>
