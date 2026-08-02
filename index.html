@@ -13,10 +13,10 @@
   <!-- Supabase JS Client -->
   <script src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'></script>
   
-  <!-- PayPal SDK (تم ترميز & إلى &amp; بنجاح) -->
+  <!-- PayPal SDK (تم إصلاح الرمز & إلى &amp;) -->
   <script src='https://www.paypal.com/sdk/js?client-id=YOUR_PAYPAL_CLIENT_ID&amp;currency=USD'></script>
 
-  <!-- وسم b:skin الإجباري لبلوجر يحتوي على جميع التنسيقات -->
+  <!-- وسم b:skin الإجباري لبلوجر محمي بـ CDATA -->
   <b:skin><![CDATA[
     :root {
       --bg-dark: #0f172a;
@@ -209,7 +209,7 @@
     <!-- إعلان سفلي -->
     <div class='ad-slot'>مساحة إعلانية (AdSlot Bottom)</div>
 
-    <!-- قسم الإحصائيات والأدوات الإجباري الخاص ببلوجر -->
+    <!-- قسم إجباري لبلوجر -->
     <b:section id='main' showaddelement='yes'/>
   </div>
 
@@ -225,12 +225,14 @@
 
   <script type='text/javascript'>
     /* <![CDATA[ */
-    const SUPABASE_URL = "https://your-project-id.supabase.co";
-    const SUPABASE_ANON_KEY = "your_supabase_anon_key";
-    const API_BASE_URL = "http://localhost:3000/api";
+    // 1. إعدادات Supabase ورابط السيرفر المباشر على Vercel
+    const SUPABASE_URL = "https://your-project-id.supabase.co"; // ضع رابط مشروع Supabase الخاص بك
+    const SUPABASE_ANON_KEY = "your_supabase_anon_key";          // ضع مفتاح Anon الخاص بك
+    const API_BASE_URL = "https://ad-craft-ai-phi.vercel.app/api"; // رابط Vercel المباشر
 
     const supabase = supabasejs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+    // 2. التحقق من الجلسة وتحديث النقاط عند الفتح
     document.addEventListener('DOMContentLoaded', async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
@@ -250,6 +252,7 @@
       }
     }
 
+    // 3. إرسال طلب التوليد للسيرفر
     const adForm = document.getElementById('ad-form');
     const submitBtn = document.getElementById('submit-btn');
 
@@ -298,6 +301,7 @@
       }
     });
 
+    // 4. دالة النسخ مع Fallback للحماية
     function copyResult() {
       const text = document.getElementById('result-text').innerText;
       if (navigator.clipboard) {
@@ -313,6 +317,7 @@
       }
     }
 
+    // 5. إدارة نافذة PayPal والدفع
     function openChargeModal() {
       const modal = document.getElementById('charge-modal');
       const paypalContainer = document.getElementById('paypal-button-container');
