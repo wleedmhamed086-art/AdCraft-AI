@@ -1,18 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="ar" dir="rtl">
+<html xmlns='http://www.w3.org/1999/xhtml' 
+      xmlns:b='http://www.google.com/2005/gml/b' 
+      xmlns:data='http://www.google.com/2005/gml/data' 
+      xmlns:expr='http://www.google.com/2005/gml/expr' 
+      lang='ar' dir='rtl'>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>مولد الإعلانات بالذكاء الاصطناعي</title>
+  <meta charset='UTF-8'/>
+  <meta content='width=device-width, initial-scale=1.0' name='viewport'/>
+  <title><data:blog.title/></title>
   
   <!-- Supabase JS Client -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'></script>
   
-  <!-- PayPal SDK (تم إصلاح &currency لتصبح &amp;currency) -->
-  <script src="https://www.paypal.com/sdk/js?client-id=YOUR_PAYPAL_CLIENT_ID&amp;currency=USD"></script>
+  <!-- PayPal SDK (تم ترميز & إلى &amp; بنجاح) -->
+  <script src='https://www.paypal.com/sdk/js?client-id=YOUR_PAYPAL_CLIENT_ID&amp;currency=USD'></script>
 
-  <style>
-    /* <![CDATA[ */
+  <!-- وسم b:skin الإجباري لبلوجر يحتوي على جميع التنسيقات -->
+  <b:skin><![CDATA[
     :root {
       --bg-dark: #0f172a;
       --card-bg: rgba(30, 41, 59, 0.7);
@@ -141,82 +146,84 @@
       max-width: 450px;
       width: 90%;
     }
-    /* ]]> */
-  </style>
+  ]]></b:skin>
 </head>
 <body>
 
-  <div class="container">
+  <div class='container'>
     <header>
       <h2>⚡ مولد الإعلانات الذكي</h2>
       <div>
-        <span class="credits-badge">النقاط: <span id="credits-count">0</span></span>
-        <button onclick="openChargeModal()" style="margin-right: 10px; padding: 6px 12px; border-radius: 8px; cursor: pointer;">شحن</button>
+        <span class='credits-badge'>النقاط: <span id='credits-count'>0</span></span>
+        <button onclick='openChargeModal()' style='margin-right: 10px; padding: 6px 12px; border-radius: 8px; cursor: pointer;'>شحن</button>
       </div>
     </header>
 
     <!-- إعلان علوي -->
-    <div class="ad-slot">مساحة إعلانية (AdSlot Top)</div>
+    <div class='ad-slot'>مساحة إعلانية (AdSlot Top)</div>
 
-    <main class="glass-card">
-      <form id="ad-form">
-        <div class="form-group">
-          <label for="productName">اسم المنتج أو الخدمة</label>
-          <input type="text" id="productName" placeholder="مثال: تطبيق تنظيم الوقت" required="required" />
+    <main class='glass-card'>
+      <form id='ad-form'>
+        <div class='form-group'>
+          <label for='productName'>اسم المنتج أو الخدمة</label>
+          <input id='productName' placeholder='مثال: تطبيق تنظيم الوقت' required='required' type='text'/>
         </div>
 
-        <div class="form-group">
-          <label for="productDesc">تفاصيل ومميزات المنتج</label>
-          <textarea id="productDesc" rows="4" placeholder="اكتب أهم الفوائد والمميزات..." required="required"></textarea>
+        <div class='form-group'>
+          <label for='productDesc'>تفاصيل ومميزات المنتج</label>
+          <textarea id='productDesc' placeholder='اكتب أهم الفوائد والمميزات...' required='required' rows='4'></textarea>
         </div>
 
-        <div style="display: flex; gap: 15px;">
-          <div class="form-group" style="flex: 1;">
-            <label for="tone">نغمة الخطاب</label>
-            <select id="tone">
-              <option value="حماسية وجذابة">حماسية وجذابة</option>
-              <option value="احترافية ورسمية">احترافية ورسمية</option>
-              <option value="وديّة وفكاهية">وديّة وفكاهية</option>
+        <div style='display: flex; gap: 15px;'>
+          <div class='form-group' style='flex: 1;'>
+            <label for='tone'>نغمة الخطاب</label>
+            <select id='tone'>
+              <option value='حماسية وجذابة'>حماسية وجذابة</option>
+              <option value='احترافية ورسمية'>احترافية ورسمية</option>
+              <option value='وديّة وفكاهية'>وديّة وفكاهية</option>
             </select>
           </div>
 
-          <div class="form-group" style="flex: 1;">
-            <label for="platform">المنصة الإعلانية</label>
-            <select id="platform">
-              <option value="Facebook">فيسبوك (Facebook)</option>
-              <option value="Instagram">إنستغرام (Instagram)</option>
-              <option value="TikTok">تيك توك (TikTok)</option>
-              <option value="Google Ads">إعلانات جوجل</option>
+          <div class='form-group' style='flex: 1;'>
+            <label for='platform'>المنصة الإعلانية</label>
+            <select id='platform'>
+              <option value='Facebook'>فيسبوك (Facebook)</option>
+              <option value='Instagram'>إنستغرام (Instagram)</option>
+              <option value='TikTok'>تيك توك (TikTok)</option>
+              <option value='Google Ads'>إعلانات جوجل</option>
             </select>
           </div>
         </div>
 
-        <button type="submit" id="submit-btn" class="btn">توليد النص الإعلاني (1 نقطة)</button>
+        <button class='btn' id='submit-btn' type='submit'>توليد النص الإعلاني (1 نقطة)</button>
       </form>
 
-      <div id="result-container" style="display: none;">
-        <div class="result-box">
-          <button class="copy-btn" onclick="copyResult()">نسخ النص 📋</button>
-          <div id="result-text"></div>
+      <div id='result-container' style='display: none;'>
+        <div class='result-box'>
+          <button class='copy-btn' onclick='copyResult()'>نسخ النص 📋</button>
+          <div id='result-text'></div>
         </div>
       </div>
     </main>
 
     <!-- إعلان سفلي -->
-    <div class="ad-slot">مساحة إعلانية (AdSlot Bottom)</div>
+    <div class='ad-slot'>مساحة إعلانية (AdSlot Bottom)</div>
+
+    <!-- قسم الإحصائيات والأدوات الإجباري الخاص ببلوجر -->
+    <b:section id='main' showaddelement='yes'/>
   </div>
 
   <!-- Modal شحن النقاط -->
-  <div id="charge-modal" class="modal">
-    <div class="modal-content">
-      <h3 style="margin-bottom: 15px;">شحن رصيد النقاط</h3>
-      <p style="margin-bottom: 20px; color: var(--text-muted);">باقة 10 نقاط بـ $4.99 دولار</p>
-      <div id="paypal-button-container"></div>
-      <button onclick="closeChargeModal()" style="margin-top: 15px; width: 100%; padding: 10px; background: transparent; color: var(--text-muted); border: none; cursor: pointer;">إلغاء</button>
+  <div class='modal' id='charge-modal'>
+    <div class='modal-content'>
+      <h3 style='margin-bottom: 15px;'>شحن رصيد النقاط</h3>
+      <p style='margin-bottom: 20px; color: var(--text-muted);'>باقة 10 نقاط بـ $4.99 دولار</p>
+      <div id='paypal-button-container'></div>
+      <button onclick='closeChargeModal()' style='margin-top: 15px; width: 100%; padding: 10px; background: transparent; color: var(--text-muted); border: none; cursor: pointer;'>إلغاء</button>
     </div>
   </div>
 
-  <script type="text/javascript">
+  <script type='text/javascript'>
     /* <![CDATA[ */
     const SUPABASE_URL = "https://your-project-id.supabase.co";
     const SUPABASE_ANON_KEY = "your_supabase_anon_key";
@@ -351,379 +358,6 @@
       document.getElementById('charge-modal').style.display = 'none';
     }
     /* ]]> */
-  </script>
-</body>
-</html><!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>مولد الإعلانات بالذكاء الاصطناعي</title>
-  
-  <!-- Supabase JS Client -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  
-  <!-- PayPal SDK (استبدل YOUR_PAYPAL_CLIENT_ID بالمفتاح الخاص بك) -->
-  <script src="https://www.paypal.com/sdk/js?client-id=YOUR_PAYPAL_CLIENT_ID&currency=USD"></script>
-
-  <style>
-    :root {
-      --bg-dark: #0f172a;
-      --card-bg: rgba(30, 41, 59, 0.7);
-      --accent-color: #6366f1;
-      --accent-hover: #4f46e5;
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --border-color: rgba(255, 255, 255, 0.1);
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
-    body { background: var(--bg-dark); color: var(--text-main); min-height: 100vh; padding: 20px; }
-
-    .container { max-width: 900px; margin: 0 auto; }
-    
-    /* Dark Glassmorphism Header */
-    header {
-      background: var(--card-bg);
-      backdrop-filter: blur(12px);
-      border: 1px solid var(--border-color);
-      padding: 15px 25px;
-      border-radius: 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 25px;
-    }
-
-    .credits-badge {
-      background: rgba(99, 102, 241, 0.2);
-      border: 1px solid var(--accent-color);
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-weight: bold;
-    }
-
-    /* Main Form Glass Card */
-    .glass-card {
-      background: var(--card-bg);
-      backdrop-filter: blur(12px);
-      border: 1px solid var(--border-color);
-      padding: 30px;
-      border-radius: 20px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-      margin-bottom: 25px;
-    }
-
-    .form-group { margin-bottom: 20px; }
-    label { display: block; margin-bottom: 8px; color: var(--text-muted); font-size: 0.9em; }
-    
-    input, textarea, select {
-      width: 100%;
-      padding: 12px;
-      background: rgba(15, 23, 42, 0.6);
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
-      color: var(--text-main);
-      font-size: 1rem;
-    }
-
-    input:focus, textarea:focus, select:focus {
-      outline: none;
-      border-color: var(--accent-color);
-    }
-
-    .btn {
-      background: var(--accent-color);
-      color: white;
-      border: none;
-      padding: 14px 28px;
-      border-radius: 10px;
-      font-size: 1rem;
-      font-weight: bold;
-      cursor: pointer;
-      width: 100%;
-      transition: background 0.2s ease;
-    }
-
-    .btn:hover { background: var(--accent-hover); }
-    .btn:disabled { background: #475569; cursor: not-allowed; }
-
-    /* Output Section */
-    .result-box {
-      margin-top: 20px;
-      white-space: pre-wrap;
-      background: rgba(15, 23, 42, 0.8);
-      padding: 20px;
-      border-radius: 12px;
-      border: 1px solid var(--border-color);
-      position: relative;
-    }
-
-    .copy-btn {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      background: rgba(255, 255, 255, 0.1);
-      border: none;
-      color: var(--text-main);
-      padding: 6px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.8em;
-    }
-
-    /* Ad Slot Placeholder */
-    .ad-slot {
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px dashed var(--border-color);
-      padding: 20px;
-      text-align: center;
-      color: var(--text-muted);
-      border-radius: 12px;
-      margin: 20px 0;
-    }
-
-    /* Modal for Charging */
-    .modal {
-      display: none;
-      position: fixed;
-      top:0; left:0; width:100%; height:100%;
-      background: rgba(0,0,0,0.8);
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-    }
-    .modal-content {
-      background: #1e293b;
-      padding: 30px;
-      border-radius: 16px;
-      max-width: 450px;
-      width: 90%;
-    }
-  </style>
-</head>
-<body>
-
-  <div class="container">
-    <header>
-      <h2>⚡ مولد الإعلانات الذكي</h2>
-      <div>
-        <span class="credits-badge">النقاط: <span id="credits-count">0</span></span>
-        <button onclick="openChargeModal()" style="margin-right: 10px; padding: 6px 12px; border-radius: 8px; cursor: pointer;">شحن</button>
-      </div>
-    </header>
-
-    <!-- إعلان علوي -->
-    <div class="ad-slot">مساحة إعلانية (AdSlot Top)</div>
-
-    <main class="glass-card">
-      <form id="ad-form">
-        <div class="form-group">
-          <label for="productName">اسم المنتج أو الخدمة</label>
-          <input type="text" id="productName" placeholder="مثال: تطبيق تنظيم الوقت" required>
-        </div>
-
-        <div class="form-group">
-          <label for="productDesc">تفاصيل ومميزات المنتج</label>
-          <textarea id="productDesc" rows="4" placeholder="اكتب أهم الفوائد والمميزات..." required></textarea>
-        </div>
-
-        <div style="display: flex; gap: 15px;">
-          <div class="form-group" style="flex: 1;">
-            <label for="tone">نغمة الخطاب</label>
-            <select id="tone">
-              <option value="حماسية وجذابة">حماسية وجذابة</option>
-              <option value="احترافية ورسمية">احترافية ورسمية</option>
-              <option value="وديّة وفكاهية">وديّة وفكاهية</option>
-            </select>
-          </div>
-
-          <div class="form-group" style="flex: 1;">
-            <label for="platform">المنصة الإعلانية</label>
-            <select id="platform">
-              <option value="Facebook">فيسبوك (Facebook)</option>
-              <option value="Instagram">إنستغرام (Instagram)</option>
-              <option value="TikTok">تيك توك (TikTok)</option>
-              <option value="Google Ads">إعلانات جوجل</option>
-            </select>
-          </div>
-        </div>
-
-        <button type="submit" id="submit-btn" class="btn">توليد النص الإعلاني (1 نقطة)</button>
-      </form>
-
-      <div id="result-container" style="display: none;">
-        <div class="result-box">
-          <button class="copy-btn" onclick="copyResult()">نسخ النص 📋</button>
-          <div id="result-text"></div>
-        </div>
-      </div>
-    </main>
-
-    <!-- إعلان سفلي -->
-    <div class="ad-slot">مساحة إعلانية (AdSlot Bottom)</div>
-  </div>
-
-  <!-- Modal شحن النقاط -->
-  <div id="charge-modal" class="modal">
-    <div class="modal-content">
-      <h3 style="margin-bottom: 15px;">شحن رصيد النقاط</h3>
-      <p style="margin-bottom: 20px; color: var(--text-muted);">باقة 10 نقاط بـ $4.99 دولار</p>
-      <div id="paypal-button-container"></div>
-      <button onclick="closeChargeModal()" style="margin-top: 15px; width: 100%; padding: 10px; background: transparent; color: var(--text-muted); border: none; cursor: pointer;">إلغاء</button>
-    </div>
-  </div>
-
-  <script>
-    // 1. إعداد Supabase Client
-    const SUPABASE_URL = "https://your-project-id.supabase.co";
-    const SUPABASE_ANON_KEY = "your_supabase_anon_key";
-    const API_BASE_URL = "http://localhost:3000/api"; // عنوان سيرفر الـ Backend
-
-    const supabase = supabasejs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    // 2. إدارة الجلسات وتحديث النقاط عند التحميل
-    document.addEventListener('DOMContentLoaded', async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        // يمكنك توجيه المستخدم لصفحة تسجيل الدخول إذا لم يكن مسجلاً
-        console.log('المستخدم غير مفرس الجلسة');
-      } else {
-        await fetchUserProfile(session);
-      }
-    });
-
-    // جلب ملف المستخدم لمعرفة النقاط
-    async function fetchUserProfile(session) {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('credits_left')
-        .eq('id', session.user.id)
-        .single();
-
-      if (data) {
-        document.getElementById('credits-count').innerText = data.credits_left;
-      }
-    }
-
-    // 3. معالجة نموذج التوليد وإرسال التوكن لـ API السيرفر
-    const adForm = document.getElementById('ad-form');
-    const submitBtn = document.getElementById('submit-btn');
-
-    adForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      // جلب توكن الجلسة من Supabase
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        alert('يرجى تسجيل الدخول أولاً لتوليد الإعلانات.');
-        return;
-      }
-
-      // إيقاف الزر لمنع الضغط المتكرر
-      submitBtn.disabled = true;
-      submitBtn.innerText = 'جاري التوليد بالذكاء الاصطناعي... ⏳';
-
-      try {
-        const response = await fetch(`${API_BASE_URL}/generate`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session.access_token}` // إرسال التوكن بأمان
-          },
-          body: JSON.stringify({
-            productName: document.getElementById('productName').value,
-            productDesc: document.getElementById('productDesc').value,
-            tone: document.getElementById('tone').value,
-            platform: document.getElementById('platform').value
-          })
-        });
-
-        const data = await response.json();
-
-        if (!response.ok || !data.success) {
-          throw new Error(data.error || 'حدث خطأ غير متوقع أثناء التوليد');
-        }
-
-        // عرض النتيجة وتحديث الرصيد
-        document.getElementById('result-text').innerText = data.result;
-        document.getElementById('result-container').style.display = 'block';
-        document.getElementById('credits-count').innerText = data.creditsLeft;
-
-      } catch (err) {
-        alert(`❌ تنبيه: ${err.message}`);
-      } finally {
-        // إعادة الزر لربط العمليات القادمة
-        submitBtn.disabled = false;
-        submitBtn.innerText = 'توليد النص الإعلاني (1 نقطة)';
-      }
-    });
-
-    // 4. دالة النسخ مع Fallback للحماية
-    function copyResult() {
-      const text = document.getElementById('result-text').innerText;
-      if (navigator.clipboard) {
-        navigator.clipboard.writeText(text).then(() => alert('تم النسخ بنجاح!'));
-      } else {
-        const textarea = document.createElement('textarea');
-        textarea.value = text;
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textarea);
-        alert('تم النسخ بنجاح!');
-      }
-    }
-
-    // 5. إدارة نافذة PayPal والدفع
-    function openChargeModal() {
-      const modal = document.getElementById('charge-modal');
-      const paypalContainer = document.getElementById('paypal-button-container');
-      
-      // تفريغ الحاوية لمنع تكرار الرسم
-      paypalContainer.innerHTML = '';
-      modal.style.display = 'flex';
-
-      // رسم أزرار PayPal
-      paypal.Buttons({
-        createOrder: (data, actions) => {
-          return actions.order.create({
-            purchase_units: [{
-              amount: { value: '4.99' }
-            }]
-          });
-        },
-        onApprove: async (data, actions) => {
-          const order = await actions.order.capture();
-          const { data: { session } } = await supabase.auth.getSession();
-
-          // تأكيد العملية في السيرفر
-          const res = await fetch(`${API_BASE_URL}/paypal-capture`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${session.access_token}`
-            },
-            body: JSON.stringify({
-              orderID: order.id,
-              creditsToAdd: 10
-            })
-          });
-
-          const resultData = await res.json();
-          if (resultData.success) {
-            document.getElementById('credits-count').innerText = resultData.newCredits;
-            alert('تم شحن 10 نقاط بنجاح!');
-            closeChargeModal();
-          }
-        }
-      }).render('#paypal-button-container');
-    }
-
-    function closeChargeModal() {
-      document.getElementById('charge-modal').style.display = 'none';
-    }
   </script>
 </body>
 </html>
