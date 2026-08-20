@@ -1,9 +1,12 @@
-# 🚀 AdCraft AI
-منصة ذكاء اصطناعي لتوليد النصوص الإعلانية وشحن النقاط عبر PayPal.
+# معرض أعمال بيكاليكا
 
-## 🛠️ التقنيات المستخدمة
-* **Frontend:** HTML, Tailwind CSS, Supabase JS
-* **Backend:** Vercel Serverless Functions (Node.js)
-* **AI:** Google Gemini API
-* **Database:** Supabase
-* **Payments:** PayPal REST API
+Portfolio عربي RTL جاهز للنشر كصفحة ثابتة.
+
+## قبل رفعه
+- افتح `index.html` واستبدل `YOUR_EMAIL@example.com` ببريدك الحقيقي.
+- استبدل المشاريع النموذجية بروابط Demo حقيقية عندما تكون متاحة.
+- لا تقدم أي مشروع تجريبي على أنه عمل لعميل حقيقي.
+- يمكنك إضافة صور المشاريع وروابط GitHub أو Demo داخل بطاقات المشاريع.
+
+## طريقة الاستخدام في بيكاليكا
+انشر المجلد على أي استضافة Static أو GitHub Pages أو Cloudflare Pages، ثم ضع رابط الصفحة المنشورة في معرض الأعمال.
